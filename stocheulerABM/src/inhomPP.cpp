@@ -33,6 +33,10 @@ std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, cons
     Rcpp::stop("input vector 'tvec' and 'lambdavec' must be the same length");
   }
 
+  if(tmax < tvec[k]){
+    Rcpp::Rcout << " --- warning, tmax is less than the end of 'tvec'; please make sure this is what you want --- \n";
+  }
+
   std::vector<double> Lambda(k+1,0.);
   for(int j=1; j<k+1; j++){
     Lambda[j] = Lambda[j-1] + 0.5*(lambdavec[j] + lambdavec[j-1])*(tvec[j] - tvec[j-1]);
@@ -46,10 +50,12 @@ std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, cons
   int j{0};
 
   while(a[n] < tmax){
+
     u += R::rexp(1.);
     while( (Lambda[j+1] < u) && (j < k) ){
       j++;
     }
+
     double a_n1 = tvec[j] + ((u - Lambda[j]) / lambdavec[j]);
     a.push_back(a_n1); /* Lambda[j] <= u < Lambda[j+1] */
     n++;
@@ -58,8 +64,12 @@ std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, cons
       a.erase(a.begin());
       return a;
     }
+
   }
 
   a.erase(a.begin());
+  if(a.size()>1){
+    a.erase(a.end()-1);
+  }
   return a;
 };

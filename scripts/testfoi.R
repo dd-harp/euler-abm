@@ -118,8 +118,8 @@ library(stocheulerABM)
 out <- stocheulerABM::inhomPP_piecewiseconst(
   tvec = piecewise_approx$x,
   lambdavec = piecewise_approx$y,
-  tmax = tail(piecewise_approx$y,1),
-  first = T
+  tmax = tail(piecewise_approx$x,1),
+  first = F
 )
 
 times2 <- unlist(parallel::mclapply(X = 1:1e5,FUN = function(x){stocheulerABM::inhomPP_piecewiseconst(
