@@ -113,6 +113,23 @@ hist_out <- hist(times[times<48],breaks = 48)
 #   
 # }
 
+library(stocheulerABM)
+
+out <- stocheulerABM::inhomPP_piecewiseconst(
+  tvec = piecewise_approx$x,
+  lambdavec = piecewise_approx$y,
+  tmax = tail(piecewise_approx$y,1),
+  first = T
+)
+
+times2 <- unlist(parallel::mclapply(X = 1:1e5,FUN = function(x){stocheulerABM::inhomPP_piecewiseconst(
+  tvec = piecewise_approx$x,
+  lambdavec = piecewise_approx$y,
+  tmax = tail(piecewise_approx$y,1),
+  first = T
+)}))
+
+hist(times2[times2<48],breaks = 48)
 
 # NHPP_inversion_all <- function(approx,tmax){
 #   a <- 0
