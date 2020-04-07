@@ -83,7 +83,7 @@ axis(side = 1,at = c(0,cumsum(rep(6,48/6))),
      labels = c(0,as.character(rep(cumsum(rep(6,24/6)),times=2))))
 
 
-piecewise_approx <- approx(x = 0:95,y = cyclicIntensity(0:95),method = "constant",n=length(0:95))
+piecewise_approx <- approx(x = 0:(24*14),y = cyclicIntensity(0:(24*14)),method = "constant",n=length(0:(24*14)))
 
 NHPP_inversion_1st <- function(approx){
   t <- approx$x
