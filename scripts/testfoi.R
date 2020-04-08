@@ -74,7 +74,7 @@ cyclicApprox <- approx(x = 0:23,y = cyclicIntensity(0:23),method = "constant",n=
 # Intensity
 plot(x,cyclicIntensity(x),type="l",ylim = c(0,0.25),
      main = "Inhomogeneous Intensity Function",xaxt="n",
-     xlab = "Time (hours)",ylab = "Intensity",col="firebrick3",lwd=1.5)
+     xlab = "Time (hours)",ylab = "Intensity",col="firebrick3",lwd=2.15)
 
 for(i in 0:48){
 
@@ -82,9 +82,9 @@ for(i in 0:48){
 
   segments(x0 = i,x1 = i+1,
            y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j],
-           col = "darkorchid3",lwd=1.5)
-  points(x=i,y=cyclicApprox$y[j],pch=16,col="darkorchid3",cex=0.5)
-  points(x=i+1,y=cyclicApprox$y[j],pch=1,col="darkorchid3",cex=0.5)
+           col = "darkorchid3",lwd=1.85)
+  points(x=i,y=cyclicApprox$y[j],pch=16,col="darkorchid3",cex=0.85)
+  points(x=i+1,y=cyclicApprox$y[j],pch=1,col="darkorchid3",cex=0.85)
   if(i != 48){
     segments(x0 = i+1,x1 = i+1,y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j+1],
              lty = 2,col="darkorchid3")
@@ -109,9 +109,9 @@ Lambda_discrete <- cumsum(lambda_discrete$y*0.01)
 pdf_1st <- lambda * exp(-Lambda)
 pmf_1st <- lambda_discrete$y * exp(-Lambda_discrete)
 
-plot(x,pdf_1st,type="l",
-     xlab = "Time (hours)",ylab = "Density",
-     main = "Time to First Event",col = "firebrick3",lwd=1.5)
+# plot(x,pdf_1st,type="l",
+#      xlab = "Time (hours)",ylab = "Density",
+#      main = "Time to First Event",col = "firebrick3",lwd=1.5)
 # lines(x,pmf_1st,col="darkorchid3",lwd=1.5,lty=1)
 
 
