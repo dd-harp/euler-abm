@@ -14,6 +14,9 @@
 #include <Rcpp.h>
 
 /* sample piecewise constant PP */
-std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tj, const Rcpp::NumericVector& lambdaj, const double tmax, const bool first);
+std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, const Rcpp::NumericVector& lambdavec, const double tmax, const bool first);
+
+/* sample first event time via rejection algorithm */
+Rcpp::NumericVector inhomPP_piecewiseconst_reject(const Rcpp::NumericVector& tvec, const Rcpp::NumericVector& lambdavec);
 
 #endif

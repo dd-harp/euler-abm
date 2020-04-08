@@ -19,6 +19,22 @@ inhomPP_piecewiseconst <- function(tvec, lambdavec, tmax, first) {
     .Call('_stocheulerABM_inhomPP_piecewiseconst', PACKAGE = 'stocheulerABM', tvec, lambdavec, tmax, first)
 }
 
+#' Sample First Event Time Inhomogeneous Poisson Process with Piecewise Constant Intensity
+#'
+#' Sample an inhomogeneous Poisson process withe piecewise constant intensity using an accept-reject algorithm.
+#' If the first event occurs after the time that the intensity is defined via \code{lambdavec}, return a \code{NaN}
+#'
+#' @param tvec times at which the intensity changes (in j=0,1,...,k)
+#' @param lambdavec values at the left endpoints of intensity (in j=0,1,...,k)
+#'
+#' @return a vector of number of rejections and the time of first event
+#'
+#'
+#' @export
+inhomPP_piecewiseconst_reject <- function(tvec, lambdavec) {
+    .Call('_stocheulerABM_inhomPP_piecewiseconst_reject', PACKAGE = 'stocheulerABM', tvec, lambdavec)
+}
+
 rcpp_hello_world <- function() {
     .Call('_stocheulerABM_rcpp_hello_world', PACKAGE = 'stocheulerABM')
 }

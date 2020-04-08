@@ -19,6 +19,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// inhomPP_piecewiseconst_reject
+Rcpp::NumericVector inhomPP_piecewiseconst_reject(const Rcpp::NumericVector& tvec, const Rcpp::NumericVector& lambdavec);
+RcppExport SEXP _stocheulerABM_inhomPP_piecewiseconst_reject(SEXP tvecSEXP, SEXP lambdavecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type tvec(tvecSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type lambdavec(lambdavecSEXP);
+    rcpp_result_gen = Rcpp::wrap(inhomPP_piecewiseconst_reject(tvec, lambdavec));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _stocheulerABM_rcpp_hello_world() {
@@ -32,6 +44,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
+    {"_stocheulerABM_inhomPP_piecewiseconst_reject", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst_reject, 2},
     {"_stocheulerABM_rcpp_hello_world", (DL_FUNC) &_stocheulerABM_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };

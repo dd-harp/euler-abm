@@ -177,45 +177,19 @@ times_lambda <- unlist(parallel::mclapply(X = 1:1e5,FUN = function(x){stocheuler
   first = T
 )}))
 
+times_lambda_rej <- parallel::mclapply(X = 1:1e5,FUN = function(x){stocheulerABM::inhomPP_piecewiseconst_reject(
+  tvec = lambda_discrete$x,
+  lambdavec = lambda_discrete$y
+)})
+
+par(mfrow=c(1,2))
 plot(x,pdf_1st,type="l",
      xlab = "Time (hours)",ylab = "Density",
-     main = "Time to First Event",col = "firebrick3",lwd=2.15)
+     main = "Time to First Event (Sampling Integrated Hazard)",col = "firebrick3",lwd=2.15)
 hist(times_lambda,breaks=48,probability = T,add=T,col = adjustcolor("steelblue",alpha.f = 0.5),border=grey(0.5,0.5))
 
-# NHPP_inversion_all <- function(approx,tmax){
-#   a <- 0
-#   u <- 0
-#   j <- 1
-#   Lambda <- c(0,0)
-#
-#   t <- approx$x
-#   lambda <- approx$y
-#
-#   while(tail(a,1) < tmax){
-#
-#     u <- u + rexp(n=1)
-#     Lambda[j] <- 0 # lambda_{j}
-#     Lambda[j+1] <- Lambda[1] + 0.5*(lambda[j+1] + lambda[j])*(t[j+1] - t[j]) # lambda_{j+1}
-#
-#
-#   }
-#
-#
-#   t <- approx$x
-#   lambda <- approx$y
-#   j <- 1
-#   u <- rexp(n=1)
-#   Lambda <- rep(0,2)
-#   Lambda[1] <- 0 # lambda_{j}
-#   Lambda[2] <- Lambda[1] + 0.5*(lambda[j+1] + lambda[j])*(t[j+1] - t[j]) # lambda_{j+1}
-#   while(Lambda[2] < u){
-#     j <- j + 1
-#     if(j+1 > length(t)){
-#       return(NaN)
-#     }
-#     Lambda[1] <- Lambda[2]
-#     Lambda[2] <- Lambda[1] + 0.5*(lambda[j+1] + lambda[j])*(t[j+1] - t[j]) # lambda_{j+1}
-#   }
-#   tout <- t[j-1] + ((u - Lambda[1])/lambda[j-1]) #  Lambda_{j} <= u < Lambda_{j+1}
-#   return(tout)
-# }
+plot(x,pdf_1st,type="l",
+     xlab = "Time (hours)",ylab = "Density",
+     main = "Time to First Event (Rejection Sampling)",col = "firebrick3",lwd=2.15)
+hist(sapply(times_lambda_rej,function(x){x[["time"]]}),breaks=48,probability = T,add=T,col = adjustcolor("darkorchid3",alpha.f = 0.5),border=grey(0.5,0.5))
+par(mfrow=c(1,1))
