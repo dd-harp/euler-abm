@@ -5,6 +5,23 @@
 
 using namespace Rcpp;
 
+// SIRMarkov_MNRM
+Rcpp::NumericMatrix SIRMarkov_MNRM(const double tmax, const int S, const int I, const int R, const double beta, const double gamma, const bool verbose);
+RcppExport SEXP _stocheulerABM_SIRMarkov_MNRM(SEXP tmaxSEXP, SEXP SSEXP, SEXP ISEXP, SEXP RSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type tmax(tmaxSEXP);
+    Rcpp::traits::input_parameter< const int >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const int >::type I(ISEXP);
+    Rcpp::traits::input_parameter< const int >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(SIRMarkov_MNRM(tmax, S, I, R, beta, gamma, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // inhomPP_piecewiseconst
 std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, const Rcpp::NumericVector& lambdavec, const double tmax, const bool first);
 RcppExport SEXP _stocheulerABM_inhomPP_piecewiseconst(SEXP tvecSEXP, SEXP lambdavecSEXP, SEXP tmaxSEXP, SEXP firstSEXP) {
@@ -43,6 +60,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_stocheulerABM_SIRMarkov_MNRM", (DL_FUNC) &_stocheulerABM_SIRMarkov_MNRM, 7},
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
     {"_stocheulerABM_inhomPP_piecewiseconst_reject", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst_reject, 2},
     {"_stocheulerABM_rcpp_hello_world", (DL_FUNC) &_stocheulerABM_rcpp_hello_world, 0},
