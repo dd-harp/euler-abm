@@ -22,6 +22,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// discretise
+Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt);
+RcppExport SEXP _stocheulerABM_discretise(SEXP outSEXP, SEXP dtSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type out(outSEXP);
+    Rcpp::traits::input_parameter< const int >::type dt(dtSEXP);
+    rcpp_result_gen = Rcpp::wrap(discretise(out, dt));
+    return rcpp_result_gen;
+END_RCPP
+}
 // inhomPP_piecewiseconst
 std::vector<double> inhomPP_piecewiseconst(const Rcpp::NumericVector& tvec, const Rcpp::NumericVector& lambdavec, const double tmax, const bool first);
 RcppExport SEXP _stocheulerABM_inhomPP_piecewiseconst(SEXP tvecSEXP, SEXP lambdavecSEXP, SEXP tmaxSEXP, SEXP firstSEXP) {
@@ -61,6 +73,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stocheulerABM_SIRMarkov_MNRM", (DL_FUNC) &_stocheulerABM_SIRMarkov_MNRM, 7},
+    {"_stocheulerABM_discretise", (DL_FUNC) &_stocheulerABM_discretise, 2},
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
     {"_stocheulerABM_inhomPP_piecewiseconst_reject", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst_reject, 2},
     {"_stocheulerABM_rcpp_hello_world", (DL_FUNC) &_stocheulerABM_rcpp_hello_world, 0},

@@ -22,6 +22,18 @@ SIRMarkov_MNRM <- function(tmax, S, I, R, beta, gamma, verbose) {
     .Call('_stocheulerABM_SIRMarkov_MNRM', PACKAGE = 'stocheulerABM', tmax, S, I, R, beta, gamma, verbose)
 }
 
+#' Discretize Output
+#'
+#' Modified from \code{smfsb} package
+#'
+#' @param out a matrix
+#' @param out dt the discretization lattice
+#'
+#' @export
+discretise <- function(out, dt) {
+    .Call('_stocheulerABM_discretise', PACKAGE = 'stocheulerABM', out, dt)
+}
+
 #' Sample an Inhomogeneous Poisson Process with Piecewise Constant Intensity
 #'
 #' Sample an inhomogeneous Poisson process withe piecewise constant intensity using an algorithm presented in:
