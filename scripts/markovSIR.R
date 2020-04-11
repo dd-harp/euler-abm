@@ -136,3 +136,53 @@ ggplot(mc_simsQuant) +
   geom_path(aes(x=time,y=mean,color=state),alpha=0.85) +
   geom_ribbon(aes(x=time,ymin=q_lo,ymax=q_hi,fill=state),alpha=0.45) +
   theme_bw()
+
+
+# exact
+lambda <- 1.5
+I <- 1
+N <- 50
+pk <- rep(0,50)
+pk[1] <- exp(-lambda)
+pk[2] <- N*exp(-((N-1)*lambda)/N) * (exp(-((N-1)*lambda)/N) - pk[1])
+
+# assumes I(0)=1
+exact_probs <- function(N,lambda,phi){
+  probs <- rep(NaN,N+1)
+  k <- 0
+  probs[k+1] <- phi(-lambda)
+  repeat{
+    k <- k + 1
+    if(k+1==N+1){
+      break()
+    }
+    b <- ((N-k)*lambda) / N
+    term1 <- choose(N,k)*(phi(-b)^(k+1))
+    term2 <- 0
+    for(i in 0:(k-1)){
+      term2 <- term2 + (choose(N-i,k-i) * (phi(-b)^(k-i)) * probs[i+1])
+    }
+    probs[k+1] <- term1 - term2
+  }
+  
+  # while(k <= N+1){
+  #   k <- k + 1
+  #   b <- ((N-k)*lambda) / N
+  #   term1 <- choose(N,k)*(phi(-b)^(k+1))
+  #   term2 <- 0
+  #   for(i in 0:(k-1)){
+  #     term2 <- term2 + (choose(N-i,k-i) * (phi(-b)^(k-i)) * probs[i+1])
+  #   }
+  #   probs[k+1] <- term1 - term2
+  # }
+  return(probs)
+}
+
+phi <- function(b){
+  exp(b)
+}
+
+probs <- exact_probs(N = N,lambda = lambda,phi = phi)
+
+debug(exact_probs)
+probs <- exact_probs(N = N,lambda = lambda,phi = phi)
