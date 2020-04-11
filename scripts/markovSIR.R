@@ -105,6 +105,10 @@ mc_sims <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = 
   out <- stocheulerABM::discretise(out = out,dt = 1)
   outdf <- reshape2::melt(as.data.frame(out),id.vars="time")
   outdf$mc <- i
+  storage.mode(outdf$time) <- "integer"
+  storage.mode(outdf$value) <- "integer"
+  outdf$variable <- as.character(outdf$variable)
+  colnames(outdf) <- c("time","state","count","mc")
   return(outdf)
 }
 
@@ -113,9 +117,22 @@ close(pb)
 snow::stopCluster(cl);rm(cl);gc()
 
 ggplot(mc_sims) +
-  geom_path(aes(x=time,y=value,color=variable,group=interaction(mc,variable)),alpha=0.15) +
+  geom_path(aes(x=time,y=count,color=state,group=interaction(mc,state)),alpha=0.15) +
   theme_bw()
 
-ggplot(mc_sims[which(mc_sims$variable=="I"),]) +
-  geom_path(aes(x=time,y=value,group=mc),color="darkorchid3",alpha=0.15) +
+ggplot(mc_sims[which(mc_sims$state=="I"),]) +
+  geom_path(aes(x=time,y=count,group=mc),color="darkorchid3",alpha=0.15) +
+  theme_bw()
+
+# compute means and 95% quantiles
+mc_sims %>%
+  as_tibble %>%
+  group_by(state,time) %>%
+  summarise(mean = mean(count),
+            q_lo = quantile(count, 0.025),
+            q_hi = quantile(count, 0.975)) -> mc_simsQuant
+
+ggplot(mc_simsQuant) +
+  geom_path(aes(x=time,y=mean,color=state),alpha=0.85) +
+  geom_ribbon(aes(x=time,ymin=q_lo,ymax=q_hi,fill=state),alpha=0.45) +
   theme_bw()
