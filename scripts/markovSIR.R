@@ -153,7 +153,7 @@ exact_probs <- function(N,lambda,phi){
   probs[k+1] <- phi(-lambda)
   repeat{
     k <- k + 1
-    if(k+1==N+1){
+    if(k+1>N+1){
       break()
     }
     b <- ((N-k)*lambda) / N
@@ -164,17 +164,6 @@ exact_probs <- function(N,lambda,phi){
     }
     probs[k+1] <- term1 - term2
   }
-  
-  # while(k <= N+1){
-  #   k <- k + 1
-  #   b <- ((N-k)*lambda) / N
-  #   term1 <- choose(N,k)*(phi(-b)^(k+1))
-  #   term2 <- 0
-  #   for(i in 0:(k-1)){
-  #     term2 <- term2 + (choose(N-i,k-i) * (phi(-b)^(k-i)) * probs[i+1])
-  #   }
-  #   probs[k+1] <- term1 - term2
-  # }
   return(probs)
 }
 
@@ -182,7 +171,14 @@ phi <- function(b){
   exp(b)
 }
 
-probs <- exact_probs(N = N,lambda = lambda,phi = phi)
+N <- 50
+lambda <- 1.5
 
-debug(exact_probs)
 probs <- exact_probs(N = N,lambda = lambda,phi = phi)
+plot(0:N,probs,pch=16)
+abline(h=0)
+# probs_norm <- probs/sum(probs)
+# points(0:N,probs_norm,col=adjustcolor("firebrick3",alpha.f = 0.6),pch=16)
+
+# debug(exact_probs)
+# probs <- exact_probs(N = N,lambda = lambda,phi = phi)
