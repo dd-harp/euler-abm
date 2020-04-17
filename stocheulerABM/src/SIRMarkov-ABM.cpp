@@ -170,8 +170,8 @@ Rcpp::List SIRMarkov_ABM(
 
   humans_markov_vec humans;
   humans.reserve(N);
+  std::string state;
   for(int i=0; i<N; i++){
-    std::string state("");
     /* initial susceptible */
     if(i < S){
       state = "S";
