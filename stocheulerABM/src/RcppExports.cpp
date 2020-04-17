@@ -5,6 +5,24 @@
 
 using namespace Rcpp;
 
+// SIRMarkov_ABM
+Rcpp::List SIRMarkov_ABM(const double dt, const double tmax, const int S, const int I, const int R, const double beta, const double gamma, const bool verbose);
+RcppExport SEXP _stocheulerABM_SIRMarkov_ABM(SEXP dtSEXP, SEXP tmaxSEXP, SEXP SSEXP, SEXP ISEXP, SEXP RSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const double >::type tmax(tmaxSEXP);
+    Rcpp::traits::input_parameter< const int >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const int >::type I(ISEXP);
+    Rcpp::traits::input_parameter< const int >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(SIRMarkov_ABM(dt, tmax, S, I, R, beta, gamma, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SIRMarkov_MNRM
 Rcpp::NumericMatrix SIRMarkov_MNRM(const double tmax, const int S, const int I, const int R, const double beta, const double gamma, const bool verbose);
 RcppExport SEXP _stocheulerABM_SIRMarkov_MNRM(SEXP tmaxSEXP, SEXP SSEXP, SEXP ISEXP, SEXP RSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP verboseSEXP) {
@@ -72,6 +90,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_stocheulerABM_SIRMarkov_ABM", (DL_FUNC) &_stocheulerABM_SIRMarkov_ABM, 8},
     {"_stocheulerABM_SIRMarkov_MNRM", (DL_FUNC) &_stocheulerABM_SIRMarkov_MNRM, 7},
     {"_stocheulerABM_discretise", (DL_FUNC) &_stocheulerABM_discretise, 2},
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
