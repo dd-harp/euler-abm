@@ -89,7 +89,3 @@ inhomPP_piecewiseconst_reject <- function(tvec, lambdavec) {
     .Call('_stocheulerABM_inhomPP_piecewiseconst_reject', PACKAGE = 'stocheulerABM', tvec, lambdavec)
 }
 
-rcpp_hello_world <- function() {
-    .Call('_stocheulerABM_rcpp_hello_world', PACKAGE = 'stocheulerABM')
-}
-

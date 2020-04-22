@@ -1,3 +1,11 @@
+# --------------------------------------------------------------------------------
+#
+#   Figure: show inhomogeneous intensity function and piecewise approx
+#   Sean L. Wu (slwu89@berkeley.edu)
+#   April 2020
+#
+# --------------------------------------------------------------------------------
+
 rm(list=ls());gc()
 
 mar_default <- c(5.1, 4.1, 4.1, 2.1)

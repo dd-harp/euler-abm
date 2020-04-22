@@ -1,11 +1,11 @@
 Package: stocheulerABM
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Exact and Approximate Methods for SIR Epidemic Models
 Version: 1.0
 Date: 2020-04-06
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more full sentences.
+Author: Sean L. Wu
+Maintainer: Sean L. Wu <slwu89@berkeley.edu>
+Description: Tools to simulate stochastic SIR (Markov and non-Markovian) epidemic models via an exact stochastic simulation algorithm and approximate agent-based model, and closed form solution for final epidemic sizes.
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.3)
 LinkingTo: Rcpp

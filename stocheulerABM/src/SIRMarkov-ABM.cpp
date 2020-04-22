@@ -225,8 +225,8 @@ Rcpp::List SIRMarkov_ABM(
     }
 
     /* if epidemic is over return early */
-    if(R_hist[nout] == N){
-      if(verbose){Rcpp::Rcout << " --- all individuals in 'R', returning early --- \n";}
+    if((R_hist[nout] + S_hist[nout]) == N){
+      if(verbose){Rcpp::Rcout << " --- epidemic burned out, returning early --- \n";}
       break;
     }
 

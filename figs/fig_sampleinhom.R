@@ -1,3 +1,11 @@
+# --------------------------------------------------------------------------------
+#
+#   Figure: compare sampling of NHPP first event times via inversion vs. accept-reject
+#   Sean L. Wu (slwu89@berkeley.edu)
+#   April 2020
+#
+# --------------------------------------------------------------------------------
+
 rm(list=ls());gc()
 library(parallel)
 

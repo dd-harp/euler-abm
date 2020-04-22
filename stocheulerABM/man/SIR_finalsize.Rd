@@ -22,7 +22,7 @@ Compute the final epidemic size of a stochastic SIR epidemic with arbitrary dist
 }
 }
 \details{
-This method becomes numerically unstable for N larger than around 50-60.
+This method becomes numerically unstable for N larger than about 100.
 }
 \examples{
 \dontrun{

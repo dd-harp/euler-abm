@@ -78,16 +78,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _stocheulerABM_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stocheulerABM_SIRMarkov_ABM", (DL_FUNC) &_stocheulerABM_SIRMarkov_ABM, 8},
@@ -95,7 +85,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stocheulerABM_discretise", (DL_FUNC) &_stocheulerABM_discretise, 2},
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
     {"_stocheulerABM_inhomPP_piecewiseconst_reject", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst_reject, 2},
-    {"_stocheulerABM_rcpp_hello_world", (DL_FUNC) &_stocheulerABM_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
 

@@ -11,7 +11,7 @@
 #' Compute the final epidemic size of a stochastic SIR epidemic with arbitrary distribution of infectious period using the closed form method of:
 #'    * Ball, Frank. "A unified approach to the distribution of total size and total area under the trajectory of infectives in epidemic models." Advances in Applied Probability 18.2 (1986): 289-310.
 #'
-#'  This method becomes numerically unstable for N larger than around 50-60.
+#'  This method becomes numerically unstable for N larger than about 100.
 #'
 #'
 #' @param N initial numer of susceptibles
