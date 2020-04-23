@@ -40,6 +40,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SIRnonMarkov_MNRM
+Rcpp::NumericMatrix SIRnonMarkov_MNRM(const double tmax, const int S, const int I, const int R, const double beta, const double gamma_shape, const double gamma_scale, const bool verbose);
+RcppExport SEXP _stocheulerABM_SIRnonMarkov_MNRM(SEXP tmaxSEXP, SEXP SSEXP, SEXP ISEXP, SEXP RSEXP, SEXP betaSEXP, SEXP gamma_shapeSEXP, SEXP gamma_scaleSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type tmax(tmaxSEXP);
+    Rcpp::traits::input_parameter< const int >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const int >::type I(ISEXP);
+    Rcpp::traits::input_parameter< const int >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_shape(gamma_shapeSEXP);
+    Rcpp::traits::input_parameter< const double >::type gamma_scale(gamma_scaleSEXP);
+    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(SIRnonMarkov_MNRM(tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // discretise
 Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt);
 RcppExport SEXP _stocheulerABM_discretise(SEXP outSEXP, SEXP dtSEXP) {
@@ -82,6 +100,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_stocheulerABM_SIRMarkov_ABM", (DL_FUNC) &_stocheulerABM_SIRMarkov_ABM, 8},
     {"_stocheulerABM_SIRMarkov_MNRM", (DL_FUNC) &_stocheulerABM_SIRMarkov_MNRM, 7},
+    {"_stocheulerABM_SIRnonMarkov_MNRM", (DL_FUNC) &_stocheulerABM_SIRnonMarkov_MNRM, 8},
     {"_stocheulerABM_discretise", (DL_FUNC) &_stocheulerABM_discretise, 2},
     {"_stocheulerABM_inhomPP_piecewiseconst", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst, 4},
     {"_stocheulerABM_inhomPP_piecewiseconst_reject", (DL_FUNC) &_stocheulerABM_inhomPP_piecewiseconst_reject, 2},

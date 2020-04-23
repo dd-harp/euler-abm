@@ -43,6 +43,30 @@ SIRMarkov_MNRM <- function(tmax, S, I, R, beta, gamma, verbose) {
     .Call('_stocheulerABM_SIRMarkov_MNRM', PACKAGE = 'stocheulerABM', tmax, S, I, R, beta, gamma, verbose)
 }
 
+#' Simulate non-Markovian SIR Model via Modified Next Reaction Method (MNRM)
+#'
+#' In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution.
+#'
+#' Sample a trajectory from the Markovian SIR model using the MNRM algorithm presented in:
+#'   * Anderson, D. F. (2007). A modified next reaction method for simulating chemical systems with time dependent propensities and delays. Journal of Chemical Physics, 127(21). \url{https://doi.org/10.1063/1.2799998}
+#'
+#' @param tmax maximum time of simulation
+#' @param S initial number of susceptible individuals
+#' @param I initial number of infected & infectious individuals
+#' @param R initial number of recovered individuals
+#' @param beta the product of transmission probability and contact rate
+#' @param gamma_shape shape parameter of Weibull distributed infectious period
+#' @param gamma_scale scale parameter of Weibull distributed infectious period
+#' @param verbose print extra information?
+#'
+#' @return a matrix
+#'
+#'
+#' @export
+SIRnonMarkov_MNRM <- function(tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose) {
+    .Call('_stocheulerABM_SIRnonMarkov_MNRM', PACKAGE = 'stocheulerABM', tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose)
+}
+
 #' Discretize Output
 #'
 #' Modified from \code{smfsb} package
