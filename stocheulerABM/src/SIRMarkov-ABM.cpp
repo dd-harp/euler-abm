@@ -227,6 +227,7 @@ Rcpp::List SIRMarkov_ABM(
     /* if epidemic is over return early */
     if((R_hist[nout] + S_hist[nout]) == N){
       if(verbose){Rcpp::Rcout << " --- epidemic burned out, returning early --- \n";}
+      nout += 1;
       break;
     }
 
@@ -234,10 +235,10 @@ Rcpp::List SIRMarkov_ABM(
   }
 
   /* resize output and return */
-  t_hist.resize(nout-1);
-  S_hist.resize(nout-1);
-  I_hist.resize(nout-1);
-  R_hist.resize(nout-1);
+  t_hist.resize(nout);
+  S_hist.resize(nout);
+  I_hist.resize(nout);
+  R_hist.resize(nout);
 
   return Rcpp::List::create(
     Rcpp::Named("time") = t_hist,

@@ -8,6 +8,7 @@
 
 rm(list=ls());gc()
 library(stocheulerABM)
+library(PropCIs)
 library(parallel)
 library(foreach)
 library(doSNOW)
@@ -28,7 +29,7 @@ nrep <- 1e4
 # --------------------------------------------------------------------------------
 
 # set up cluster and source the file on each core
-cl <- snow::makeSOCKcluster(3)
+cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
@@ -48,7 +49,7 @@ final_size_markovMNRM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opt
     R = 0,
     beta = beta,
     gamma = gamma,
-    verbose = TRUE
+    verbose = FALSE
   )
 
    tail(out,1)
@@ -64,7 +65,7 @@ snow::stopCluster(cl);rm(cl);gc()
 # --------------------------------------------------------------------------------
 
 # set up cluster and source the file on each core
-cl <- snow::makeSOCKcluster(3)
+cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
@@ -85,7 +86,7 @@ final_size_markovABM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts
     R = 0,
     beta = beta,
     gamma = gamma,
-    verbose = TRUE
+    verbose = FALSE
   )
 
    n <- length(out$time)
@@ -110,38 +111,93 @@ final_size_markovExact <- stocheulerABM::SIR_finalsize(N = S0, m = I0, lambda = 
 
 
 # --------------------------------------------------------------------------------
-#   figure plot (8 x 14 PDF)
+#   figure plot (10 x 16 PDF)
 # --------------------------------------------------------------------------------
+
+# probs MNRM
+probs_MNRM <- table(as.vector(final_size_markovMNRM[,"R"])-I0)/nrep
+
+# probs ABM
+probs_ABM <- table(as.vector(final_size_markovABM[,"R"])-I0)/nrep
+
+# compute pointwise CIs
+cis_MNRM <- lapply(X = table(as.vector(final_size_markovMNRM[,"R"])-I0),FUN = function(x){
+  PropCIs::scoreci(x = x,n = nrep,conf.level = 0.99)
+})
+cis_lo_MNRM <- sapply(X = cis_MNRM,FUN = function(x){
+  x$conf.int[1]
+})
+cis_hi_MNRM <- sapply(X = cis_MNRM,FUN = function(x){
+  x$conf.int[2]
+})
+
+cis_ABM <- lapply(X = table(as.vector(final_size_markovABM[,"R"])-I0),FUN = function(x){
+  PropCIs::scoreci(x = x,n = nrep,conf.level = 0.95)
+})
+cis_lo_ABM <- sapply(X = cis_ABM,FUN = function(x){
+  x$conf.int[1]
+})
+cis_hi_ABM <- sapply(X = cis_ABM,FUN = function(x){
+  x$conf.int[2]
+})
+
 
 par(mfrow=c(1,2))
 
+xadj <- 0.5
+
+# MNRM
 plot(0:S0,final_size_markovExact,
      xlab = "Final Number Infected",ylab = "Probability",
      main = "Analytic Solution vs. Exact Simulation",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
-     cex=1.25,
-     type="b",pch=16,ylim = c(0,.3)
+     cex=1.1,
+     type="p",pch=16,ylim = c(0,.3)
 )
-lines(
-  x = 0:S0,
-  y = table(as.vector(final_size_markovMNRM[,"R"])-1)/nrep,
-  col = adjustcolor("steelblue",alpha.f = 0.95),
-  type="b",pch=16,cex=1.25
+invisible(mapply(FUN = function(x,y){
+  segments(
+    x0 = x-xadj,
+    y0 = y,
+    x1 = x+xadj,
+    y1 = y,
+    col = "darkorchid3",
+    lwd = 1.85,lend = 2
+  )
+},x=0:S0,y=probs_MNRM))
+rect(
+  xleft = (0:S0)-xadj,
+  ybottom = cis_lo_MNRM,
+  xright = (0:S0)+xadj,
+  ytop = cis_hi_MNRM,
+  border = NA,
+  col = adjustcolor("steelblue",alpha.f = 0.45)
 )
 
-
+# ABM
 plot(0:S0,final_size_markovExact,
      xlab = "Final Number Infected",ylab = "Probability",
      main = "Analytic Solution vs. Approximate ABM",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
-     cex=1.25,
-     type="b",pch=16,ylim = c(0,.3)
+     cex=1.1,
+     type="p",pch=16,ylim = c(0,.3)
 )
-lines(
-  x = 0:S0,
-  y = table(as.vector(final_size_markovABM[,"R"])-1)/nrep,
-  col = adjustcolor("steelblue",alpha.f = 0.95),
-  type="b",pch=16,cex=1.25
+invisible(mapply(FUN = function(x,y){
+  segments(
+    x0 = x-xadj,
+    y0 = y,
+    x1 = x+xadj,
+    y1 = y,
+    col = "darkorchid3",
+    lwd = 1.85,lend = 2
+  )
+},x=0:S0,y=probs_ABM))
+rect(
+  xleft = (0:S0)-xadj,
+  ybottom = cis_lo_ABM,
+  xright = (0:S0)+xadj,
+  ytop = cis_hi_ABM,
+  border = NA,
+  col = adjustcolor("steelblue",alpha.f = 0.45)
 )
 
 par(mfrow=c(1,1))
