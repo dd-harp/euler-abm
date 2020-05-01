@@ -3,6 +3,7 @@
 export(SIRMarkov_ABM)
 export(SIRMarkov_MNRM)
 export(SIR_finalsize)
+export(SIRnonMarkov_ABM)
 export(SIRnonMarkov_MNRM)
 export(discretise)
 export(inhomPP_piecewiseconst)

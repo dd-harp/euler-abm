@@ -43,6 +43,29 @@ SIRMarkov_MNRM <- function(tmax, S, I, R, beta, gamma, verbose) {
     .Call('_stocheulerABM_SIRMarkov_MNRM', PACKAGE = 'stocheulerABM', tmax, S, I, R, beta, gamma, verbose)
 }
 
+#' Simulate non-Markovian SIR Model via Agent-based Model (ABM)
+#'
+#' In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution. Sample a trajectory
+#' from it using the approximate ABM.
+#'
+#' @param dt the time step
+#' @param tmax maximum time of simulation
+#' @param S initial number of susceptible individuals
+#' @param I initial number of infected & infectious individuals
+#' @param R initial number of recovered individuals
+#' @param beta the product of transmission probability and contact rate
+#' @param gamma_shape shape parameter of Weibull distributed infectious period
+#' @param gamma_scale scale parameter of Weibull distributed infectious period
+#' @param verbose print extra information?
+#'
+#' @return a list (use \code{do.call(cbind,out)} to convert to \code{matrix})
+#'
+#'
+#' @export
+SIRnonMarkov_ABM <- function(dt, tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose) {
+    .Call('_stocheulerABM_SIRnonMarkov_ABM', PACKAGE = 'stocheulerABM', dt, tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose)
+}
+
 #' Simulate non-Markovian SIR Model via Modified Next Reaction Method (MNRM)
 #'
 #' In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution.
