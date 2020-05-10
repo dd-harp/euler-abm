@@ -14,7 +14,7 @@ const static double infinity = std::numeric_limits<double>::infinity();
 
 //' Simulate non-Markovian SIR Model via Modified Next Reaction Method (MNRM)
 //'
-//' In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution.
+//' In this non-Markovian variant of the SIR model, the infectious period has a Gamma distribution.
 //'
 //' Sample a trajectory from the Markovian SIR model using the MNRM algorithm presented in:
 //'   * Anderson, D. F. (2007). A modified next reaction method for simulating chemical systems with time dependent propensities and delays. Journal of Chemical Physics, 127(21). \url{https://doi.org/10.1063/1.2799998}
@@ -24,8 +24,8 @@ const static double infinity = std::numeric_limits<double>::infinity();
 //' @param I initial number of infected & infectious individuals
 //' @param R initial number of recovered individuals
 //' @param beta the product of transmission probability and contact rate
-//' @param gamma_shape shape parameter of Weibull distributed infectious period
-//' @param gamma_scale scale parameter of Weibull distributed infectious period
+//' @param gamma_shape shape parameter of Gamma distributed infectious period
+//' @param gamma_scale scale parameter of Gamma distributed infectious period
 //' @param verbose print extra information?
 //'
 //' @return a matrix
@@ -81,7 +81,7 @@ Rcpp::NumericMatrix SIRnonMarkov_MNRM(
 
   // initial completions of delay recovery for I(0) individuals
   for(int k=0; k<I; k++){
-    sk.push(R::rweibull(gamma_shape,gamma_scale));
+    sk.push(R::rgamma(gamma_shape,gamma_scale));
   }
 
   // 3-4: draw internal jump times
@@ -125,7 +125,7 @@ Rcpp::NumericMatrix SIRnonMarkov_MNRM(
       X[0] -= 1;
       X[1] += 1;
       // draw a recovery time
-      sk.push(tnow + R::rweibull(gamma_shape,gamma_scale));
+      sk.push(tnow + R::rgamma(gamma_shape,gamma_scale));
     }
 
     // 11. update Tk

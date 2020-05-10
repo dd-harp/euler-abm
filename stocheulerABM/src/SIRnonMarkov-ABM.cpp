@@ -68,7 +68,7 @@ void I_compartment(human_nonmarkov_ptr& human, const double tmax){
   human->state = human->nextstate;
 
   /* sample transition to R */
-  human->tnext = human->tnow + R::rweibull(human->gamma_shape,human->gamma_scale);
+  human->tnext = human->tnow + R::rgamma(human->gamma_shape,human->gamma_scale);
   human->nextstate = "R";
 
 };
@@ -120,7 +120,7 @@ void calc_FOI(humans_nonmarkov_vec& humans, const double beta){
 
 //' Simulate non-Markovian SIR Model via Agent-based Model (ABM)
 //'
-//' In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution. Sample a trajectory
+//' In this non-Markovian variant of the SIR model, the infectious period has a Gamma distribution. Sample a trajectory
 //' from it using the approximate ABM.
 //'
 //' @param dt the time step
@@ -129,8 +129,8 @@ void calc_FOI(humans_nonmarkov_vec& humans, const double beta){
 //' @param I initial number of infected & infectious individuals
 //' @param R initial number of recovered individuals
 //' @param beta the product of transmission probability and contact rate
-//' @param gamma_shape shape parameter of Weibull distributed infectious period
-//' @param gamma_scale scale parameter of Weibull distributed infectious period
+//' @param gamma_shape shape parameter of Gamma distributed infectious period
+//' @param gamma_scale scale parameter of Gamma distributed infectious period
 //' @param verbose print extra information?
 //'
 //' @return a list (use \code{do.call(cbind,out)} to convert to \code{matrix})
