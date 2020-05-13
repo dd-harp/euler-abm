@@ -17,9 +17,9 @@ SIRnonMarkov_MNRM(tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose)
 
 \item{beta}{the product of transmission probability and contact rate}
 
-\item{gamma_shape}{shape parameter of Weibull distributed infectious period}
+\item{gamma_shape}{shape parameter of Gamma distributed infectious period}
 
-\item{gamma_scale}{scale parameter of Weibull distributed infectious period}
+\item{gamma_scale}{scale parameter of Gamma distributed infectious period}
 
 \item{verbose}{print extra information?}
 }
@@ -27,7 +27,7 @@ SIRnonMarkov_MNRM(tmax, S, I, R, beta, gamma_shape, gamma_scale, verbose)
 a matrix
 }
 \description{
-In this non-Markovian variant of the SIR model, the infectious period has a Weibull distribution.
+In this non-Markovian variant of the SIR model, the infectious period has a Gamma distribution.
 }
 \details{
 Sample a trajectory from the Markovian SIR model using the MNRM algorithm presented in:

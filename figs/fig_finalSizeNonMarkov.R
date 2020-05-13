@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------------------
 #
-#   Figure: compare final epidemic sizes in Markov SIR
+#   Figure: compare final epidemic sizes in non-Markovian SIR
 #   Sean L. Wu (slwu89@berkeley.edu)
 #   April 2020
 #
@@ -18,10 +18,16 @@ library(doSNOW)
 S0 = 50 # S_0
 I0 = 1 # I_0
 N <- S0 + I0
-R0 <- 2.5
-gamma <- 1/5
-beta <- R0 * (gamma/N)
-nrep <- 1e5
+R0 <- 1.85
+
+gamma_mean <- 5
+gamma_var <- 0.5^2
+
+gamma_shape <- (gamma_mean^2)/gamma_var
+gamma_scale <- gamma_var/gamma_mean
+
+beta <- R0 * (1/gamma_mean/N)
+nrep <- 1e3
 
 
 # --------------------------------------------------------------------------------
@@ -33,22 +39,23 @@ cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
-parallel::clusterSetRNGStream(cl = cl,iseed = 6978149L)
+parallel::clusterSetRNGStream(cl = cl,iseed = 191459L)
 
 # progress bar in parallel foreach (see: https://blog.revolutionanalytics.com/2015/10/updates-to-the-foreach-package-and-its-friends.html)
 pb <- txtProgressBar(max=nrep, style=3)
 progress <- function(n){setTxtProgressBar(pb, n)}
 opts <- list(progress=progress)
 
-final_size_markovMNRM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
+final_size_nonmarkovMNRM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
 
-  out <- stocheulerABM::SIRMarkov_MNRM(
+  out <- stocheulerABM::SIRnonMarkov_MNRM(
     tmax = 1e4,
     S = S0,
     I = I0,
     R = 0,
     beta = beta,
-    gamma = gamma,
+    gamma_shape = gamma_shape,
+    gamma_scale = gamma_scale,
     verbose = FALSE
   )
 
@@ -69,23 +76,24 @@ cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
-parallel::clusterSetRNGStream(cl = cl,iseed = 9782101L)
+parallel::clusterSetRNGStream(cl = cl,iseed = 83595489L)
 
 # progress bar in parallel foreach (see: https://blog.revolutionanalytics.com/2015/10/updates-to-the-foreach-package-and-its-friends.html)
 pb <- txtProgressBar(max=nrep, style=3)
 progress <- function(n){setTxtProgressBar(pb, n)}
 opts <- list(progress=progress)
 
-final_size_markovABM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
+final_size_nonmarkovABM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
 
-  out <- stocheulerABM::SIRMarkov_ABM(
+  out <- stocheulerABM::SIRnonMarkov_ABM(
     dt = 0.01,
     tmax = 1e4,
     S = S0,
     I = I0,
     R = 0,
     beta = beta,
-    gamma = gamma,
+    gamma_shape = gamma_shape,
+    gamma_scale = gamma_scale,
     verbose = FALSE
   )
 
@@ -102,12 +110,13 @@ snow::stopCluster(cl);rm(cl);gc()
 #   analytic final size
 # --------------------------------------------------------------------------------
 
-# MGF of exponential distribution
-phi_exp <- function(b){
-  1 / (1 - b*(1/gamma))
+# MGF of gamma distribution
+phi_gamma <- function(b){
+  stopifnot(b < 1/gamma_scale)
+  1 / ( (1 - (gamma_scale*b))^gamma_shape )
 }
 
-final_size_markovExact <- stocheulerABM::SIR_finalsize(N = S0, m = I0, lambda = beta*N, phi = phi_exp)
+final_size_nonmarkovExact <- stocheulerABM::SIR_finalsize(N = S0, m = I0, lambda = beta*N, phi = phi_gamma)
 
 
 # --------------------------------------------------------------------------------
@@ -116,15 +125,19 @@ final_size_markovExact <- stocheulerABM::SIR_finalsize(N = S0, m = I0, lambda = 
 
 # probs MNRM
 freq_MNRM <- rep(0,N)
-tab_MNRM <- as.data.frame(table(as.vector(final_size_markovMNRM[,"R"])-I0))
+tab_MNRM <- as.data.frame(table(as.vector(final_size_nonmarkovMNRM[,"R"])-I0))
 freq_MNRM[as.integer(tab_MNRM$Var1)] <- tab_MNRM$Freq
 probs_MNRM <- freq_MNRM/nrep
 
+# probs_MNRM <- table(as.vector(final_size_nonmarkovMNRM[,"R"])-I0)/nrep
+
 # probs ABM
 freq_ABM <- rep(0,N)
-tab_ABM <- as.data.frame(table(as.vector(final_size_markovABM[,"R"])-I0))
+tab_ABM <- as.data.frame(table(as.vector(final_size_nonmarkovABM[,"R"])-I0))
 freq_ABM[as.integer(tab_ABM$Var1)] <- tab_ABM$Freq
 probs_ABM <- freq_ABM/nrep
+
+# probs_ABM <- table(as.vector(final_size_nonmarkovABM[,"R"])-I0)/nrep
 
 # compute pointwise CIs
 cis_MNRM <- lapply(X = freq_MNRM,FUN = function(x){
@@ -138,7 +151,7 @@ cis_hi_MNRM <- sapply(X = cis_MNRM,FUN = function(x){
 })
 
 cis_ABM <- lapply(X = freq_ABM,FUN = function(x){
-  PropCIs::scoreci(x = x,n = nrep,conf.level = 0.95)
+  PropCIs::scoreci(x = x,n = nrep,conf.level = 0.99)
 })
 cis_lo_ABM <- sapply(X = cis_ABM,FUN = function(x){
   x$conf.int[1]
@@ -153,12 +166,12 @@ par(mfrow=c(1,2))
 xadj <- 0.5
 
 # MNRM
-plot(0:S0,final_size_markovExact,
+plot(0:S0,final_size_nonmarkovExact,
      xlab = "Final Number Infected",ylab = "Probability",
      main = "Analytic Solution vs. Exact Simulation",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
      cex=1.1,
-     type="p",pch=16,ylim = c(0,.3)
+     type="p",pch=16,ylim = c(0,.2)
 )
 invisible(mapply(FUN = function(x,y){
   segments(
@@ -180,7 +193,7 @@ rect(
 )
 
 # ABM
-plot(0:S0,final_size_markovExact,
+plot(0:S0,final_size_nonmarkovExact,
      xlab = "Final Number Infected",ylab = "Probability",
      main = "Analytic Solution vs. Approximate ABM",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,

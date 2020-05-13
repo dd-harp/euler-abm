@@ -7,38 +7,38 @@
 # --------------------------------------------------------------------------------
 
 rm(list=ls());gc()
-library(MultiBD)
+# library(MultiBD)
 library(stocheulerABM)
 
-tList <- c(.1, .2, .25, .3 ,.35, .4, .5, .6, .7, .8, .9, 1)
-gridLength = 128
-S0 = 110 # S_0
-I0 = 15 # I_0
-
-A=0
-B = gridLength - 1
-gamma = 3.2 #3.2 #this is death rate
-beta = .025 #.019 #this is transition or infection rates
-brates1=function(S,I){0}
-drates1=function(S,I){0}
-brates2=function(S,I){0}
-drates2=function(S,I){gamma*I}
-trans=function(S,I){beta*S*I}
-
-tmax <- 100
-
-system.time(SIRexact <- MultiBD::dbd_prob(
-  t=tmax,
-  a0=S0,
-  b0=I0,
-  mu1=drates1,
-  lambda2=brates2,
-  mu2=drates2,
-  gamma=trans,
-  a=0,
-  B=B,
-  computeMode=1
-))
+# tList <- c(.1, .2, .25, .3 ,.35, .4, .5, .6, .7, .8, .9, 1)
+# gridLength = 128
+# S0 = 110 # S_0
+# I0 = 15 # I_0
+# 
+# A=0
+# B = gridLength - 1
+# gamma = 3.2 #3.2 #this is death rate
+# beta = .025 #.019 #this is transition or infection rates
+# brates1=function(S,I){0}
+# drates1=function(S,I){0}
+# brates2=function(S,I){0}
+# drates2=function(S,I){gamma*I}
+# trans=function(S,I){beta*S*I}
+# 
+# tmax <- 100
+# 
+# system.time(SIRexact <- MultiBD::dbd_prob(
+#   t=tmax,
+#   a0=S0,
+#   b0=I0,
+#   mu1=drates1,
+#   lambda2=brates2,
+#   mu2=drates2,
+#   gamma=trans,
+#   a=0,
+#   B=B,
+#   computeMode=1
+# ))
 
 
 # packages to run in parallel
@@ -46,14 +46,15 @@ library(parallel)
 library(foreach)
 library(doSNOW)
 
-tmax <- 100
-S0 = 100 # S_0
-I0 = 5 # I_0
+tmax <- 1e3
+S0 = 50 # S_0
+I0 = 1 # I_0
 N <- S0 + I0
 R0 <- 1.85
 gamma <- 1/5
 beta <- R0 * (gamma/N)
 
+# MARKOV
 out <- stocheulerABM::SIRMarkov_MNRM(
   tmax = tmax,
   S = S0,
@@ -75,15 +76,70 @@ ggplot(outdf) +
   geom_line(aes(x=time,y=value,color=variable)) +
   theme_bw()
 
+# NON-MARKOV
+gamma_mean <- 1
+gamma_var <- 0.75^2
 
-nrep <- 1e3
+gamma_shape <- (gamma_mean^2)/gamma_var
+gamma_scale <- gamma_var/gamma_mean
+
+out_nm <- stocheulerABM::SIRnonMarkov_MNRM(
+  tmax = tmax,
+  S = S0,
+  I = I0,
+  R = 0,
+  beta = beta,
+  gamma_shape = gamma_shape,
+  gamma_scale = gamma_scale,
+  verbose = TRUE
+)
+
+out_nm <- stocheulerABM::discretise(out = out_nm,dt = 1)
+
+
+library(tidyverse)
+
+out_nmdf <- melt(as.data.frame(out_nm),id.vars="time")
+
+ggplot(out_nmdf) +
+  geom_line(aes(x=time,y=value,color=variable)) +
+  theme_bw()
+
+
+
+
+
+
+
+
+
+
+
+
+tmax <- 1e3
+S0 = 50 # S_0
+I0 = 1 # I_0
+N <- S0 + I0
+# R0 <- 2.15
+R0 <- 1.85
+
+gamma_mean <- 5
+gamma_var <- 0.5^2
+
+beta <- R0 * (1/gamma_mean/N)
+
+gamma_shape <- (gamma_mean^2)/gamma_var
+gamma_scale <- gamma_var/gamma_mean
+
+# parallel
+nrep <- 1e4
 
 # set up cluster and source the file on each core
 cl <- snow::makeSOCKcluster(2)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
-parallel::clusterSetRNGStream(cl = cl,iseed = 32423423L)
+parallel::clusterSetRNGStream(cl = cl,iseed = 1657423L)
 
 # progress bar in parallel foreach (see: https://blog.revolutionanalytics.com/2015/10/updates-to-the-foreach-package-and-its-friends.html)
 pb <- txtProgressBar(max=nrep, style=3)
@@ -92,14 +148,25 @@ opts <- list(progress=progress)
 
 mc_sims <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM","reshape2")) %dopar% {
 
-  out <- stocheulerABM::SIRMarkov_MNRM(
-    tmax = tmax,
+  # out <- stocheulerABM::SIRMarkov_MNRM(
+  #   tmax = tmax,
+  #   S = S0,
+  #   I = I0,
+  #   R = 0,
+  #   beta = beta,
+  #   gamma = gamma,
+  #   verbose = FALSE
+  # )
+  
+  out <- stocheulerABM::SIRnonMarkov_MNRM(
+    tmax = 1e4,
     S = S0,
     I = I0,
     R = 0,
     beta = beta,
-    gamma = gamma,
-    verbose = TRUE
+    gamma_shape = gamma_shape,
+    gamma_scale = gamma_scale,
+    verbose = FALSE
   )
 
   out <- stocheulerABM::discretise(out = out,dt = 1)
@@ -116,12 +183,18 @@ mc_sims <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = 
 close(pb)
 snow::stopCluster(cl);rm(cl);gc()
 
-ggplot(mc_sims) +
-  geom_path(aes(x=time,y=count,color=state,group=interaction(mc,state)),alpha=0.15) +
-  theme_bw()
 
-ggplot(mc_sims[which(mc_sims$state=="I"),]) +
-  geom_path(aes(x=time,y=count,group=mc),color="darkorchid3",alpha=0.15) +
+# R histogram (final epidemic size)
+mc_sims %>%
+  as_tibble %>%
+  group_by(state,mc) %>%
+  filter(state=="R") %>%
+  slice(which.max(time)) %>% 
+  ungroup() %>%
+  select(count) -> mc_hist
+
+ggplot(data = mc_hist) +
+  stat_bin(aes(count),bins=40,boundary=0,binwidth=0.5,fill="steelblue",color="black") +
   theme_bw()
 
 # compute means and 95% quantiles
@@ -137,8 +210,19 @@ ggplot(mc_simsQuant) +
   geom_ribbon(aes(x=time,ymin=q_lo,ymax=q_hi,fill=state),alpha=0.45) +
   theme_bw()
 
+# ggplot(mc_sims) +
+#   geom_path(aes(x=time,y=count,color=state,group=interaction(mc,state)),alpha=0.15) +
+#   theme_bw()
+# 
+# ggplot(mc_sims[which(mc_sims$state=="I"),]) +
+#   geom_path(aes(x=time,y=count,group=mc),color="darkorchid3",alpha=0.15) +
+#   theme_bw()
 
-# # exact
+
+
+
+
+
 # lambda <- 1.5
 # I <- 1
 # N <- 50
