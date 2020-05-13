@@ -155,7 +155,7 @@ xadj <- 0.5
 # MNRM
 plot(0:S0,final_size_markovExact,
      xlab = "Final Number Infected",ylab = "Probability",
-     main = "Analytic Solution vs. Exact Simulation",
+     main = "Analytic Solution vs. Exact Simulation (Markov)",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
      cex=1.1,
      type="p",pch=16,ylim = c(0,.3)
@@ -182,7 +182,7 @@ rect(
 # ABM
 plot(0:S0,final_size_markovExact,
      xlab = "Final Number Infected",ylab = "Probability",
-     main = "Analytic Solution vs. Approximate ABM",
+     main = "Analytic Solution vs. Approximate ABM (Markov)",
      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
      cex=1.1,
      type="p",pch=16,ylim = c(0,.3)
