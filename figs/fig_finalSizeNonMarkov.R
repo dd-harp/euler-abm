@@ -59,7 +59,7 @@ final_size_nonmarkovMNRM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=
     verbose = FALSE
   )
 
-   tail(out,1)
+  tail(out,1)
 }
 
 # clean up the parallel cluster and remove it
