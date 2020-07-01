@@ -297,6 +297,17 @@ plot(seq(S+I), xlim = c(110,160), suscepProbs.FFT, pch = 3,
 plotCI(seq(S+I), xlim = c(110,160), suscepProbs.MC, pch = 16, 
        col = 4, ui = upper, li = lower, add=TRUE)
 
+
+
+
+
+
+
+
+
+
+
+
 ## ----multiBDsetup-----------------------------------------------------------------------
 library(MultiBD)
 tList  <- c(.1, .2, .25, .3 ,.35, .4, .5, .6, .7, .8, .9, 1)
