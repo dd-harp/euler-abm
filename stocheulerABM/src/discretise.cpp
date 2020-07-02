@@ -32,7 +32,7 @@ Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const double dt){
   double target{0.};
   int j{0};
 
-  for(int i=1; i<events; i++){
+  for(int i=0; i<events; i++){
     while(out.at(i,0) >= target){
       x.at(j,0) = target;
       for(int k=1; k<ncol; k++){
