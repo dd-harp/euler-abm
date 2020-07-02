@@ -17,7 +17,7 @@
 //'
 //' @export
 // [[Rcpp::export]]
-Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt){
+Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const double dt){
 
   int ncol = out.ncol();
   int events = out.nrow();
@@ -25,7 +25,8 @@ Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt){
   double end = out.at(events-1,0);
   double start = out.at(0,0);
 
-  int len = ((int)(end - start)) / dt + 1;
+  // int len = ((int)(end - start)) / dt + 1;
+  int len = (int)floor((end - start) / dt) + 1;
   Rcpp::NumericMatrix x(len,ncol);
 
   double target{0.};

@@ -227,6 +227,7 @@ image(tpmArray[3,3,,], main = "Monte Carlo estimates")
 
 ## ----transitionCompare------------------------------------------------------------------
 library(plotrix)
+# this line grabs the ij -> kl pairs with the highest probability
 inds <- t(which(tpmArray[3,2,,] >= sort(tpmArray[3,2,,], decreasing=T)[16],
                 arr.ind=TRUE))
 #ind1 <- sample(52,25, replace=T); ind2 <- sample(25,25,replace=T)

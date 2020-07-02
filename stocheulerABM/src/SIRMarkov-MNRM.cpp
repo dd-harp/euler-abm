@@ -102,6 +102,10 @@ Rcpp::NumericMatrix SIRMarkov_MNRM(
 
     // 7. set t += delta and update state
     tnow += Delta;
+    // check if we can break early
+    if(tnow > tmax){
+      break;
+    }
     if(mu==0){
       // S -> I
       X[0] -= 1;

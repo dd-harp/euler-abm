@@ -112,6 +112,10 @@ Rcpp::NumericMatrix SIRnonMarkov_MNRM(
     }
 
     tnow += Delta;
+    // check if we can break early
+    if(tnow > tmax){
+      break;
+    }
 
     // 7-10: update state
     if(delay){

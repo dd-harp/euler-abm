@@ -11,7 +11,7 @@
 
 #include <Rcpp.h>
 
-Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt);
+Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const double dt);
 
 
 #endif

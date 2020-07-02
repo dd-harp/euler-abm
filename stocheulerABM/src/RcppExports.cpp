@@ -78,13 +78,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // discretise
-Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const int dt);
+Rcpp::NumericMatrix discretise(const Rcpp::NumericMatrix& out, const double dt);
 RcppExport SEXP _stocheulerABM_discretise(SEXP outSEXP, SEXP dtSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type out(outSEXP);
-    Rcpp::traits::input_parameter< const int >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const double >::type dt(dtSEXP);
     rcpp_result_gen = Rcpp::wrap(discretise(out, dt));
     return rcpp_result_gen;
 END_RCPP
