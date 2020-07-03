@@ -211,29 +211,4 @@ contour_abm <- ggplot(data = trans_markov[I<=40 & S <= 60 & model %in% c("ABM","
   )
 
 contour_markov <- grid.arrange(contour_mnrm,contour_abm,nrow=1)
-# save as 8 x 14 landscape PDF
-
-
-# ggplot(data = trans_markov[I<=40 & S <= 60,]) +
-#   geom_contour(aes(x=S,y=I,z=density,colour=after_stat(level),group=model,linetype=model),size=0.85,alpha=1) +
-#   scale_color_viridis(option = "D") +
-#   guides(colour=FALSE) +
-#   xlab("S") + ylab("I") + labs(title="A. Modified Next Reaction Method") +
-#   theme_bw() +
-#   theme(
-#     panel.background=element_rect(fill="grey90"),
-#     panel.grid=element_blank(),
-#     plot.title = element_text(size = rel(2.5)),
-#     axis.title = element_text(size = rel(1.5)),
-#     axis.text = element_text(size = rel(1.5))
-#   )
-# 
-# 
-# 
-# ggplot(data = trans_markov[I<=40 & S <= 60 & model == "KFE",]) +
-#   geom_contour_filled(aes(x=S,y=I,z=density,fill=after_stat(level))) +
-#   theme_bw()
-# 
-# ggplot(data = trans_markov[I<=40 & S <= 60 & model == "MNRM",]) +
-#   geom_contour_filled(aes(x=S,y=I,z=density,fill=after_stat(level))) +
-#   theme_bw()
+# save as 8 x 14 landscape PDF: controu_Markov.pdf

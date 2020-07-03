@@ -148,62 +148,100 @@ cis_hi_ABM <- sapply(X = cis_ABM,FUN = function(x){
 })
 
 
-par(mfrow=c(1,2))
+# par(mfrow=c(1,2))
+#
+# xadj <- 0.5
+#
+# # MNRM
+# plot(0:S0,final_size_markovExact,
+#      xlab = "Final Number Infected",ylab = "Probability",
+#      main = "Analytic Solution vs. Exact Simulation (Markov)",
+#      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
+#      cex=1.1,
+#      type="p",pch=16,ylim = c(0,.3)
+# )
+# invisible(mapply(FUN = function(x,y){
+#   segments(
+#     x0 = x-xadj,
+#     y0 = y,
+#     x1 = x+xadj,
+#     y1 = y,
+#     col = "darkorchid3",
+#     lwd = 1.85,lend = 2
+#   )
+# },x=0:S0,y=probs_MNRM))
+# rect(
+#   xleft = (0:S0)-xadj,
+#   ybottom = cis_lo_MNRM,
+#   xright = (0:S0)+xadj,
+#   ytop = cis_hi_MNRM,
+#   border = NA,
+#   col = adjustcolor("steelblue",alpha.f = 0.45)
+# )
+#
+# # ABM
+# plot(0:S0,final_size_markovExact,
+#      xlab = "Final Number Infected",ylab = "Probability",
+#      main = "Analytic Solution vs. Approximate ABM (Markov)",
+#      col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
+#      cex=1.1,
+#      type="p",pch=16,ylim = c(0,.3)
+# )
+# invisible(mapply(FUN = function(x,y){
+#   segments(
+#     x0 = x-xadj,
+#     y0 = y,
+#     x1 = x+xadj,
+#     y1 = y,
+#     col = "darkorchid3",
+#     lwd = 1.85,lend = 2
+#   )
+# },x=0:S0,y=probs_ABM))
+# rect(
+#   xleft = (0:S0)-xadj,
+#   ybottom = cis_lo_ABM,
+#   xright = (0:S0)+xadj,
+#   ytop = cis_hi_ABM,
+#   border = NA,
+#   col = adjustcolor("steelblue",alpha.f = 0.45)
+# )
+#
+# par(mfrow=c(1,1))
 
-xadj <- 0.5
 
-# MNRM
-plot(0:S0,final_size_markovExact,
-     xlab = "Final Number Infected",ylab = "Probability",
-     main = "Analytic Solution vs. Exact Simulation (Markov)",
-     col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
-     cex=1.1,
-     type="p",pch=16,ylim = c(0,.3)
-)
-invisible(mapply(FUN = function(x,y){
-  segments(
-    x0 = x-xadj,
-    y0 = y,
-    x1 = x+xadj,
-    y1 = y,
-    col = "darkorchid3",
-    lwd = 1.85,lend = 2
+library(ggplot2)
+library(gridExtra)
+
+dat_exact <- data.frame(x=0:S0,y=final_size_markovExact)
+dat_mnrm_ci <- data.frame(x=0:S0,ylo=cis_lo_MNRM,yhi=cis_hi_MNRM)
+dat_mnrm <- data.frame(x=0:S0,y=probs_MNRM)
+
+plot_mnrm <- ggplot(data = dat_exact) +
+  geom_point(aes(x=x,y=y),color="firebrick3",cex=2) +
+  geom_errorbar(data=dat_mnrm_ci,aes(x=x,ymin=ylo,ymax=yhi),color="darkorchid3",alpha=0.85) +
+  geom_point(data = dat_mnrm,aes(x=x,y=y),color="darkorchid3",alpha=0.5) +
+  xlab("Final Number Infected") + ylab("Probability") + labs(title="A. Analytic Solution vs. Exact Simulation (Markov)") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = rel(2)),
+    axis.title = element_text(size = rel(1.5)),
+    axis.text = element_text(size = rel(1.5))
   )
-},x=0:S0,y=probs_MNRM))
-rect(
-  xleft = (0:S0)-xadj,
-  ybottom = cis_lo_MNRM,
-  xright = (0:S0)+xadj,
-  ytop = cis_hi_MNRM,
-  border = NA,
-  col = adjustcolor("steelblue",alpha.f = 0.45)
-)
 
-# ABM
-plot(0:S0,final_size_markovExact,
-     xlab = "Final Number Infected",ylab = "Probability",
-     main = "Analytic Solution vs. Approximate ABM (Markov)",
-     col = "firebrick3",lwd=2.15,cex.lab=1.45,cex.main=1.25,
-     cex=1.1,
-     type="p",pch=16,ylim = c(0,.3)
-)
-invisible(mapply(FUN = function(x,y){
-  segments(
-    x0 = x-xadj,
-    y0 = y,
-    x1 = x+xadj,
-    y1 = y,
-    col = "darkorchid3",
-    lwd = 1.85,lend = 2
+dat_abm_ci <- data.frame(x=0:S0,ylo=cis_lo_ABM,yhi=cis_hi_ABM)
+dat_abm <- data.frame(x=0:S0,y=probs_ABM)
+
+plot_abm <- ggplot(data = dat_exact) +
+  geom_point(aes(x=x,y=y),color="firebrick3",cex=2) +
+  geom_errorbar(data=dat_abm_ci,aes(x=x,ymin=ylo,ymax=yhi),color="darkorchid3",alpha=0.85) +
+  geom_point(data = dat_abm,aes(x=x,y=y),color="darkorchid3",alpha=0.5) +
+  xlab("Final Number Infected") + ylab("Probability") + labs(title="B. Analytic Solution vs. Approximate ABM (Markov)") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = rel(2)),
+    axis.title = element_text(size = rel(1.5)),
+    axis.text = element_text(size = rel(1.5))
   )
-},x=0:S0,y=probs_ABM))
-rect(
-  xleft = (0:S0)-xadj,
-  ybottom = cis_lo_ABM,
-  xright = (0:S0)+xadj,
-  ytop = cis_hi_ABM,
-  border = NA,
-  col = adjustcolor("steelblue",alpha.f = 0.45)
-)
 
-par(mfrow=c(1,1))
+grid.arrange(plot_mnrm,plot_abm,nrow=1)
+# save as 8x16 pdf: markovSIR_finalsize.pdf

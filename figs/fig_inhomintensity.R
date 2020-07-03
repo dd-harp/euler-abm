@@ -26,28 +26,55 @@ cyclicIntensity <- function(t,fudge=T){
 cyclicApprox <- approx(x = 0:23,y = cyclicIntensity(0:23),method = "constant",n=length(0:23))
 
 
-# Intensity
-plot(x,cyclicIntensity(x),type="l",ylim = c(0,0.25),xaxt="n",
-     xlab = "Time (hours)",ylab = expression(paste(lambda,"(t)")),
-     col="firebrick3",lwd=2.15,cex.lab=1.45)
+# # Intensity
+# plot(x,cyclicIntensity(x),type="l",ylim = c(0,0.25),xaxt="n",
+#      xlab = "Time (hours)",ylab = expression(paste(lambda,"(t)")),
+#      col="firebrick3",lwd=2.15,cex.lab=1.45)
+# 
+# for(i in 0:48){
+# 
+#   j <- (i %% 24) + 1
+# 
+#   segments(x0 = i,x1 = i+1,
+#            y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j],
+#            col = "darkorchid3",lwd=1.85)
+#   points(x=i,y=cyclicApprox$y[j],pch=16,col="darkorchid3",cex=0.85)
+#   points(x=i+1,y=cyclicApprox$y[j],pch=1,col="darkorchid3",cex=0.85)
+#   if(i != 48){
+#     segments(x0 = i+1,x1 = i+1,y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j+1],
+#              lty = 2,col="darkorchid3")
+#   }
+# 
+# }
+# axis(side = 1,at = c(0,cumsum(rep(6,48/6))),
+#      labels = c(0,as.character(rep(cumsum(rep(6,24/6)),times=2))))
 
-for(i in 0:48){
+library(ggplot2)
+library(data.table)
 
-  j <- (i %% 24) + 1
+cyclicApprox <- approx(x = 0:48,y = cyclicIntensity(0:48),method = "constant",n=length(0:48))
 
-  segments(x0 = i,x1 = i+1,
-           y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j],
-           col = "darkorchid3",lwd=1.85)
-  points(x=i,y=cyclicApprox$y[j],pch=16,col="darkorchid3",cex=0.85)
-  points(x=i+1,y=cyclicApprox$y[j],pch=1,col="darkorchid3",cex=0.85)
-  if(i != 48){
-    segments(x0 = i+1,x1 = i+1,y0 = cyclicApprox$y[j],y1 = cyclicApprox$y[j+1],
-             lty = 2,col="darkorchid3")
-  }
+plotdat_c <- data.table(time=x,intensity=cyclicIntensity(x),type="cont")
+plotdat_s <- data.table(time=cyclicApprox$x,intensity=cyclicApprox$y,type="step")
 
-}
-axis(side = 1,at = c(0,cumsum(rep(6,48/6))),
-     labels = c(0,as.character(rep(cumsum(rep(6,24/6)),times=2))))
+
+plot_int <- ggplot(data = plotdat_c) +
+  geom_line(aes(x=time,y=intensity),color="firebrick3") +
+  geom_segment(data = plotdat_s,aes(x=time,y=intensity,xend=shift(time,type = "lead"),yend=intensity),color="darkorchid3") +
+  geom_segment(data = plotdat_s,aes(x=shift(time,type="lead"),y=intensity,xend=shift(time,type = "lead"),yend=shift(intensity,type = "lead")),color="darkorchid3",linetype=2) +
+  geom_point(data = plotdat_s,aes(x=time,y=intensity),color="darkorchid3",shape=16,cex=2) +
+  geom_point(data = plotdat_s,aes(x=shift(time,type = "lead"),y=intensity),color="darkorchid3",shape=1,cex=2) +
+  xlab("Time (Hours)") + ylab(expression(paste(lambda,"(t)"))) + labs(title="Cyclic Intensity Function") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = rel(2.5)),
+    axis.title.x = element_text(size = rel(1.5)),
+    axis.title.y = element_text(size = rel(2)),
+    axis.text = element_text(size = rel(1.5))
+  )
+
+# save as 8 x 10 landscape PDF: inhomintensity.pdf
+
 
 # IntegratedCyclicIntensity <- function(t){
 #   (1/8) * (t - ( (12 * sin( (pi*t) / 12 ) ) / pi ))

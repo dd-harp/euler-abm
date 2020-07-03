@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------------------
 #
-#   Figure: compare transient transition distributions of Markov SIR
+#   Figure: compare transient transition distributions of non-Markovian SIR
 #   Sean L. Wu (slwu89@berkeley.edu)
 #   June 2020
 #
@@ -8,7 +8,6 @@
 
 rm(list=ls());gc()
 library(stocheulerABM)
-library(MultiBD)
 library(data.table)
 library(ggplot2)
 library(viridis)
@@ -25,7 +24,14 @@ R0 <- 2.5
 gamma <- 1/3.5
 beta <- R0 * (gamma/N)
 
-nrep <- 1e6
+# non-Markov parameters
+gamma_mean <- 1/gamma
+gamma_var <- 0.5^2
+
+gamma_shape <- (gamma_mean^2)/gamma_var
+gamma_scale <- gamma_var/gamma_mean
+
+nrep <- 1e5
 dt_ABM <- 0.01
 
 tmax <- 5
@@ -40,7 +46,7 @@ cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
-parallel::clusterSetRNGStream(cl = cl,iseed = 50694091L)
+parallel::clusterSetRNGStream(cl = cl,iseed = 158229L)
 
 # progress bar in parallel foreach (see: https://blog.revolutionanalytics.com/2015/10/updates-to-the-foreach-package-and-its-friends.html)
 pb <- txtProgressBar(max=nrep, style=3)
@@ -49,13 +55,14 @@ opts <- list(progress=progress)
 
 transraw_MNRM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
 
-  out <- stocheulerABM::SIRMarkov_MNRM(
+  out <- stocheulerABM::SIRnonMarkov_MNRM(
     tmax = tmax,
     S = S0,
     I = I0,
     R = 0,
     beta = beta,
-    gamma = gamma,
+    gamma_shape = gamma_shape,
+    gamma_scale = gamma_scale,
     verbose = FALSE
   )
 
@@ -86,7 +93,7 @@ cl <- snow::makeSOCKcluster(4)
 doSNOW::registerDoSNOW(cl)
 
 # use parallel RNG for multiple streams of random numbers
-parallel::clusterSetRNGStream(cl = cl,iseed = 9657813L)
+parallel::clusterSetRNGStream(cl = cl,iseed = 82459129L)
 
 # progress bar in parallel foreach (see: https://blog.revolutionanalytics.com/2015/10/updates-to-the-foreach-package-and-its-friends.html)
 pb <- txtProgressBar(max=nrep, style=3)
@@ -95,14 +102,15 @@ opts <- list(progress=progress)
 
 transraw_ABM <- foreach(i = 1:nrep,.combine = "rbind",.options.snow=opts,.packages = c("stocheulerABM")) %dopar% {
 
-   out <- stocheulerABM::SIRMarkov_ABM(
+   out <- stocheulerABM::SIRnonMarkov_ABM(
      tmax = tmax,
      dt = dt_ABM,
      S = S0,
      I = I0,
      R = 0,
      beta = beta,
-     gamma = gamma,
+     gamma_shape = gamma_shape,
+     gamma_scale = gamma_scale,
      verbose = FALSE
    )
 
@@ -124,36 +132,6 @@ dimnames(trans_ABM) <- list(as.character(0:(nrow(trans_ABM)-1)),as.character(0:(
 
 
 # --------------------------------------------------------------------------------
-#   Compute the master equation directly
-# --------------------------------------------------------------------------------
-
-brates1 <- function(a,b){0}
-drates1 <- function(a,b){0}
-brates2 <- function(a,b){0}
-drates2 <- function(a,b){gamma*b}
-trans <- function(a,b){beta*a*b}
-
-# dimensions give ending states
-# rows S: a:a0 (0:S0)
-# cols S: 0:B (0:S0+I0)
-trans_dbd <- MultiBD::dbd_prob(
-  t = tmax,a0 = S0,b0 =  I0,
-  mu1 = drates1,lambda2 = brates2,mu2 = drates2,gamma = trans,
-  a = 0, B = S0+I0,
-  computeMode = 4,tol = 1e-16,nblocks = 512
-)
-
-dbd_rows <- as.integer(rownames(trans_dbd)) + 1
-dbd_cols <- as.integer(colnames(trans_dbd)) + 1
-
-trans_KFE <- matrix(data = 0, nrow = S0+I0+1, ncol = S0+I0+1)
-trans_KFE[dbd_rows,dbd_cols] <- trans_dbd
-trans_KFE <- trans_KFE / sum(trans_KFE)
-
-dimnames(trans_KFE) <- list(as.character(0:(nrow(trans_KFE)-1)),as.character(0:(ncol(trans_KFE)-1)))
-
-
-# --------------------------------------------------------------------------------
 #   format output and plot
 # --------------------------------------------------------------------------------
 
@@ -171,21 +149,14 @@ trans_ABM_dt$N <- as.numeric(trans_ABM_dt$N)
 colnames(trans_ABM_dt) <- c("S","I","density")
 trans_ABM_dt$model <- "ABM"
 
-trans_KFE_dt <- as.data.table(as.table(trans_KFE))
-trans_KFE_dt$V1 <- as.integer(trans_KFE_dt$V1)
-trans_KFE_dt$V2 <- as.integer(trans_KFE_dt$V2)
-trans_KFE_dt$N <- as.numeric(trans_KFE_dt$N)
-colnames(trans_KFE_dt) <- c("S","I","density")
-trans_KFE_dt$model <- "KFE"
+trans_nonmarkov <- rbind(trans_MNRM_dt,trans_ABM_dt)
 
-trans_markov <- rbind(trans_MNRM_dt,trans_ABM_dt,trans_KFE_dt)
-
-contour_mnrm <- ggplot(data = trans_markov[I<=40 & S <= 60 & model %in% c("MNRM","KFE"),]) +
+ggplot(data = trans_nonmarkov) +
   geom_contour(aes(x=S,y=I,z=density,colour=after_stat(level),group=model,linetype=model),size=0.85,alpha=1) +
   scale_color_viridis(option = "D") +
-  scale_linetype_manual(values = c("KFE"=1,"MNRM"=2)) +
+  scale_linetype_manual(values = c("ABM"=2,"MNRM"=1)) +
   guides(linetype=FALSE,colour=FALSE) +
-  xlab("S") + ylab("I") + labs(title="A. Modified Next Reaction Method") +
+  xlab("S") + ylab("I") + labs(title="Non-Markovian SIR (MNRM vs. ABM)") +
   theme_bw() +
   theme(
     panel.background=element_rect(fill="grey90"),
@@ -195,45 +166,5 @@ contour_mnrm <- ggplot(data = trans_markov[I<=40 & S <= 60 & model %in% c("MNRM"
     axis.text = element_text(size = rel(1.5))
   )
 
-contour_abm <- ggplot(data = trans_markov[I<=40 & S <= 60 & model %in% c("ABM","KFE"),]) +
-  geom_contour(aes(x=S,y=I,z=density,colour=after_stat(level),group=model,linetype=model),size=0.85,alpha=1) +
-  scale_color_viridis(option = "D") +
-  scale_linetype_manual(values = c("KFE"=1,"ABM"=2)) +
-  guides(linetype=FALSE,colour=FALSE) +
-  xlab("S") + ylab("I") + labs(title="B. Agent-based Model") +
-  theme_bw() +
-  theme(
-    panel.background=element_rect(fill="grey90"),
-    panel.grid=element_blank(),
-    plot.title = element_text(size = rel(2.5)),
-    axis.title = element_text(size = rel(1.5)),
-    axis.text = element_text(size = rel(1.5))
-  )
 
-contour_markov <- grid.arrange(contour_mnrm,contour_abm,nrow=1)
-# save as 8 x 14 landscape PDF
-
-
-# ggplot(data = trans_markov[I<=40 & S <= 60,]) +
-#   geom_contour(aes(x=S,y=I,z=density,colour=after_stat(level),group=model,linetype=model),size=0.85,alpha=1) +
-#   scale_color_viridis(option = "D") +
-#   guides(colour=FALSE) +
-#   xlab("S") + ylab("I") + labs(title="A. Modified Next Reaction Method") +
-#   theme_bw() +
-#   theme(
-#     panel.background=element_rect(fill="grey90"),
-#     panel.grid=element_blank(),
-#     plot.title = element_text(size = rel(2.5)),
-#     axis.title = element_text(size = rel(1.5)),
-#     axis.text = element_text(size = rel(1.5))
-#   )
-# 
-# 
-# 
-# ggplot(data = trans_markov[I<=40 & S <= 60 & model == "KFE",]) +
-#   geom_contour_filled(aes(x=S,y=I,z=density,fill=after_stat(level))) +
-#   theme_bw()
-# 
-# ggplot(data = trans_markov[I<=40 & S <= 60 & model == "MNRM",]) +
-#   geom_contour_filled(aes(x=S,y=I,z=density,fill=after_stat(level))) +
-#   theme_bw()
+# save as 8 x 10 landscape PDF: contour_nonMarkov.pdf
