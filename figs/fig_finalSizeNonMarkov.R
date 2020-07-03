@@ -235,7 +235,7 @@ plot_mnrm <- ggplot(data = dat_exact) +
   xlab("Final Number Infected") + ylab("Probability") + labs(title="A. Analytic Solution vs. Exact Simulation (non-Markovian)") +
   theme_bw() +
   theme(
-    plot.title = element_text(size = rel(2)),
+    plot.title = element_text(size = rel(1.75)),
     axis.title = element_text(size = rel(1.5)),
     axis.text = element_text(size = rel(1.5))
   )
@@ -250,7 +250,7 @@ plot_abm <- ggplot(data = dat_exact) +
   xlab("Final Number Infected") + ylab("Probability") + labs(title="B. Analytic Solution vs. Approximate ABM (non-Markovian)") +
   theme_bw() +
   theme(
-    plot.title = element_text(size = rel(2)),
+    plot.title = element_text(size = rel(1.75)),
     axis.title = element_text(size = rel(1.5)),
     axis.text = element_text(size = rel(1.5))
   )
