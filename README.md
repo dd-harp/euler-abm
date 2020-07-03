@@ -1,4 +1,4 @@
-# stocheuler_ABM
+# euler-abm
 scripts and code to accompany the manuscript "Principled Simulation of Agent Based Models in Epidemiology"
 
 ## Directory structure
