@@ -76,5 +76,5 @@ deltaMarkov_ABM <- foreach(i = mc_reps$rep, dt = mc_reps$dt,.combine = "rbind",.
 close(pb)
 snow::stopCluster(cl);rm(cl);gc()
 
-saveRDS(object = transraw_ABM,file = here::here("/figs/deltaMarkov_ABM.rds"),compress = TRUE)
+saveRDS(object = deltaMarkov_ABM,file = here::here("/figs/deltaMarkov_ABM.rds"),compress = TRUE)
 
