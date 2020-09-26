@@ -211,4 +211,4 @@ contour_abm <- ggplot(data = trans_markov[I<=40 & S <= 60 & model %in% c("ABM","
   )
 
 contour_markov <- grid.arrange(contour_mnrm,contour_abm,nrow=1)
-# save as 8 x 14 landscape PDF: controu_Markov.pdf
+# save as 8 x 14 landscape PDF: contour_Markov.pdf

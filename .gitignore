@@ -2,6 +2,9 @@
 .Rhistory
 .Rapp.history
 
+# large files
+.Rds
+
 # Session Data files
 .RData
 
