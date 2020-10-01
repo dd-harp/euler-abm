@@ -22,6 +22,11 @@ library(doParallel)
 # cores for parallel
 ncores <- 16
 
+fig_directory <- here::here("/figs")
+if (!dir.exists(fig_directory)) {
+  dir.create(fig_directory)
+}
+
 # parameters
 S0 = 60 # S_0
 I0 = 10 # I_0
@@ -32,7 +37,7 @@ beta <- R0 * (gamma/N)
 tmax <- 5
 
 # mc reps
-nrep <- 2e5
+nrep <- 50
 
 # lattice of time points
 abm_dt <- c(0.001,0.005,0.01,0.025,0.05,0.075,0.1,0.5,1)
@@ -71,7 +76,7 @@ deltaMarkov_ABM <- foreach(i = mc_reps$rep, dt = mc_reps$dt,.combine = "rbind",.
 }
 
 # clean up the parallel cluster and remove it
-close(pb)
 parallel::stopCluster(cl);rm(cl);gc()
-
-saveRDS(object = deltaMarkov_ABM,file = here::here("/figs/deltaMarkov_ABM.rds"),compress = TRUE)
+result_file <- paste(fig_directory, "/deltaMarkov_ABM.rds", sep = "", collapse = "")
+cat(paste("writing to", result_file, "\n"))
+saveRDS(object = deltaMarkov_ABM,file = result_file, compress = TRUE)
