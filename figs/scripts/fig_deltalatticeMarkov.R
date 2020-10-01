@@ -37,7 +37,7 @@ beta <- R0 * (gamma/N)
 tmax <- 5
 
 # mc reps
-nrep <- 50
+nrep <- 2e5
 
 # lattice of time points
 abm_dt <- c(0.001,0.005,0.01,0.025,0.05,0.075,0.1,0.5,1)
