@@ -71,7 +71,40 @@ deltaMarkov_ABM <- foreach(i = mc_reps$rep, dt = mc_reps$dt,.combine = "rbind",.
 }
 
 # clean up the parallel cluster and remove it
-close(pb)
 parallel::stopCluster(cl);rm(cl);gc()
 
 saveRDS(object = deltaMarkov_ABM,file = here::here("/figs/deltaMarkov_ABM.rds"),compress = TRUE)
+
+
+# --------------------------------------------------------------------------------
+#   Compute the master equation directly
+# --------------------------------------------------------------------------------
+
+brates1 <- function(a,b){0}
+drates1 <- function(a,b){0}
+brates2 <- function(a,b){0}
+drates2 <- function(a,b){gamma*b}
+trans <- function(a,b){beta*a*b}
+
+# dimensions give ending states
+# rows S: a:a0 (0:S0)
+# cols S: 0:B (0:S0+I0)
+trans_dbd <- MultiBD::dbd_prob(
+   t = tmax,a0 = S0,b0 =  I0,
+   mu1 = drates1,lambda2 = brates2,mu2 = drates2,gamma = trans,
+   a = 0, B = S0+I0,
+   computeMode = 4,tol = 1e-16,nblocks = 512
+)
+
+dbd_rows <- as.integer(rownames(trans_dbd)) + 1
+dbd_cols <- as.integer(colnames(trans_dbd)) + 1
+
+trans_KFE <- matrix(data = 0, nrow = S0+I0+1, ncol = S0+I0+1)
+trans_KFE[dbd_rows,dbd_cols] <- trans_dbd
+trans_KFE <- trans_KFE / sum(trans_KFE)
+
+dimnames(trans_KFE) <- list(as.character(0:(nrow(trans_KFE)-1)),as.character(0:(ncol(trans_KFE)-1)))
+
+
+
+

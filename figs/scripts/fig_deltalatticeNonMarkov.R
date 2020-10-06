@@ -81,7 +81,6 @@ deltaNonMarkov_ABM <- foreach(i = mc_reps$rep, dt = mc_reps$dt,.combine = "rbind
 }
 
 # clean up the parallel cluster and remove it
-close(pb)
 parallel::stopCluster(cl);rm(cl);gc()
 
 saveRDS(object = deltaNonMarkov_ABM,file = here::here("/figs/deltaNonMarkov_ABM.rds"),compress = TRUE)
