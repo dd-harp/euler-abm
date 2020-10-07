@@ -3,7 +3,8 @@
 .Rapp.history
 
 # large files
-.Rds
+*.Rds
+*.rds
 
 # Session Data files
 .RData

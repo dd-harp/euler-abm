@@ -11,9 +11,9 @@ library(stocheulerABM)
 library(MultiBD)
 # library(entropy)
 library(here)
-# library(data.table)
-# library(ggplot2)
-# library(viridis)
+library(data.table)
+library(ggplot2)
+library(viridis)
 # library(gridExtra)
 library(parallel)
 library(foreach)
@@ -21,6 +21,11 @@ library(doParallel)
 
 # cores for parallel
 ncores <- 16
+
+fig_directory <- here::here("figs")
+if (!dir.exists(fig_directory)) {
+  dir.create(fig_directory)
+}
 
 # parameters
 S0 = 60 # S_0
@@ -73,7 +78,10 @@ deltaMarkov_ABM <- foreach(i = mc_reps$rep, dt = mc_reps$dt,.combine = "rbind",.
 # clean up the parallel cluster and remove it
 parallel::stopCluster(cl);rm(cl);gc()
 
-saveRDS(object = deltaMarkov_ABM,file = here::here("/figs/deltaMarkov_ABM.rds"),compress = TRUE)
+# save file
+result_file <- paste(fig_directory, "/deltaMarkov_ABM.rds", sep = "", collapse = "")
+cat(paste("writing to", result_file, "\n"))
+saveRDS(object = deltaMarkov_ABM,file = result_file, compress = TRUE)
 
 
 # --------------------------------------------------------------------------------
@@ -108,3 +116,87 @@ dimnames(trans_KFE) <- list(as.character(0:(nrow(trans_KFE)-1)),as.character(0:(
 
 
 
+
+
+
+
+# load MC data
+deltaMarkov_ABM <- readRDS(file = file.path(fig_directory,"deltaMarkov_ABM.rds"))
+
+trans_ABM <- replicate(
+   n = length(abm_dt),
+   expr = {matrix(data = 0, nrow = S0+I0+1, ncol = S0+I0+1,dimnames = list(0:(S0+I0), 0:(S0+I0)))},
+   simplify = FALSE
+)
+
+for(dt in seq_along(abm_dt)){
+   dt_ix <- which(deltaMarkov_ABM[,"dt"] == abm_dt[dt])
+   for(j in seq_along(dt_ix)){
+      this_row <- deltaMarkov_ABM[dt_ix[j],] + 1
+      trans_ABM[[dt]][this_row["S"],this_row["I"]] <- trans_ABM[[dt]][this_row["S"],this_row["I"]] + 1
+   }
+   trans_ABM[[dt]] <- trans_ABM[[dt]] / sum(trans_ABM[[dt]])
+}
+
+# calculate differences
+differences <- lapply(X = seq_along(trans_ABM),FUN = function(x){
+   dif <- abs(trans_KFE - trans_ABM[[x]])
+   dif <- as.data.table(as.table(dif))
+   dif$V1 <- as.integer(dif$V1)
+   dif$V2 <- as.integer(dif$V2)
+   dif$N <- as.numeric(dif$N)
+   dif$dt <- abm_dt[x]
+   colnames(dif) <- c("S","I","density","dt")
+   return(dif)
+})
+differences <- do.call(rbind,differences)
+
+# absolute error plot
+ggplot(data = differences[I<=40 & S <= 60,]) +
+   geom_raster(aes(x=S,y=I,fill=density)) +
+   scale_fill_viridis(option = "A") +
+   facet_wrap(. ~ dt,labeller = labeller(dt = function(x){paste0("dt: ",x)})) +
+   xlab("S") + ylab("I") + 
+   labs(title="Absolute Error (ABM vs. KFE)") +
+   guides(fill = guide_legend(title = "Error")) + 
+   theme_bw() +
+   theme(
+      panel.background=element_rect(fill="grey90"),
+      panel.grid=element_blank(),
+      plot.title = element_text(size = rel(2.5)),
+      axis.title = element_text(size = rel(1.5)),
+      axis.text = element_text(size = rel(1.25)),
+      strip.text.x = element_text(size = rel(1.2))
+   )
+
+
+# absolute diff
+abs_dif <- sapply(X = seq_along(trans_ABM),FUN = function(x){
+   sum(abs(trans_KFE - trans_ABM[[x]]))
+})
+
+
+
+
+
+sqrt( (trans_ABM[[1]])*(1 - trans_ABM[[1]])/N )
+
+# 9 largest transition probabilities
+largest <- order(trans_KFE,decreasing = TRUE)[1:9]
+pos <- arrayInd(ind = largest,.dim = dim(trans_KFE),useNames = TRUE)
+
+
+largest_ABM <- lapply(X = seq_along(abm_dt),FUN = function(x){
+   probs <- trans_ABM[[x]][pos]
+   probs_sd <- sqrt( (probs)*(1 - probs)/nrep )
+   probs_lo <- probs - (probs_sd * 1.96)
+   probs_hi <- probs + (probs_sd * 1.96)
+   cbind(probs,probs_sd,probs_lo,probs_hi,dt=abm_dt[x])
+})
+# largest_ABM <- do.call(rbind,largest_ABM)
+
+
+library(plotrix)
+i = 7
+plotrix::plotCI(x = 1:9,y = largest_ABM[[i]][,"probs"],ui = largest_ABM[[i]][,"probs_hi"],li = largest_ABM[[i]][,"probs_lo"],ylim=c(0,0.02))
+points(x = 1:9,y = sort(trans_KFE,decreasing = T)[1:9],pch=16,col="steelblue")
