@@ -114,11 +114,9 @@ trans_KFE <- trans_KFE / sum(trans_KFE)
 dimnames(trans_KFE) <- list(as.character(0:(nrow(trans_KFE)-1)),as.character(0:(ncol(trans_KFE)-1)))
 
 
-
-
-
-
-
+# --------------------------------------------------------------------------------
+#   plot of error
+# --------------------------------------------------------------------------------
 
 # load MC data
 deltaMarkov_ABM <- readRDS(file = file.path(fig_directory,"deltaMarkov_ABM.rds"))
@@ -170,33 +168,73 @@ ggplot(data = differences[I<=40 & S <= 60,]) +
    )
 
 
+
+
 # absolute diff
 abs_dif <- sapply(X = seq_along(trans_ABM),FUN = function(x){
    sum(abs(trans_KFE - trans_ABM[[x]]))
 })
 
-
-
-
-
-sqrt( (trans_ABM[[1]])*(1 - trans_ABM[[1]])/N )
-
-# 9 largest transition probabilities
-largest <- order(trans_KFE,decreasing = TRUE)[1:9]
-pos <- arrayInd(ind = largest,.dim = dim(trans_KFE),useNames = TRUE)
-
-
-largest_ABM <- lapply(X = seq_along(abm_dt),FUN = function(x){
-   probs <- trans_ABM[[x]][pos]
-   probs_sd <- sqrt( (probs)*(1 - probs)/nrep )
-   probs_lo <- probs - (probs_sd * 1.96)
-   probs_hi <- probs + (probs_sd * 1.96)
-   cbind(probs,probs_sd,probs_lo,probs_hi,dt=abm_dt[x])
-})
-# largest_ABM <- do.call(rbind,largest_ABM)
-
-
-library(plotrix)
-i = 7
-plotrix::plotCI(x = 1:9,y = largest_ABM[[i]][,"probs"],ui = largest_ABM[[i]][,"probs_hi"],li = largest_ABM[[i]][,"probs_lo"],ylim=c(0,0.02))
-points(x = 1:9,y = sort(trans_KFE,decreasing = T)[1:9],pch=16,col="steelblue")
+# # means and variances
+# n_mc <- 1e1
+# blocks <- lapply(X = (1:n_mc),FUN = function(x){
+#    if(x == 1){
+#       return(c(1,x*(nrep/n_mc)))
+#    } else {
+#       return(c(
+#          ((x-1)*(nrep/n_mc))+1,
+#          x*(nrep/n_mc)
+#       ))
+#    }
+# })
+# 
+# 
+# dt_idx <- lapply(X = abm_dt,FUN = function(x){
+#    unname(which(deltaMarkov_ABM[,"dt"] == x))
+# })
+# 
+# 
+# system.time(abs_dif_block <- parallel::mclapply(X = dt_idx,FUN = function(ix){
+#    out <- rep(0,length(blocks))
+#    mat_dt <- deltaMarkov_ABM[ix,]
+#    mc_probs <- matrix(data = 0, nrow = S0+I0+1, ncol = S0+I0+1,dimnames = list(0:(S0+I0), 0:(S0+I0)))
+#    for(i in seq_along(blocks)){
+#       mc_probs <- mc_probs * 0
+#       for(j in blocks[[i]][1]:blocks[[i]][2]){
+#          this_row <- mat_dt[j,] + 1
+#          mc_probs[this_row["S"],this_row["I"]] <- mc_probs[this_row["S"],this_row["I"]] + 1
+#       }
+#       mc_probs <- mc_probs/sum(mc_probs)
+#       out[i] <- sum(abs(trans_KFE - mc_probs))
+#    }
+#    return(out)
+# }))
+# 
+# abs_dif_block_mu <- sapply(abs_dif_block,mean)
+# 
+# abs_dif_block_ci_lo <- abs_dif_block_mu - (1.96 * sapply(abs_dif_block,sd)/sqrt(n_mc))
+# abs_dif_block_ci_hi <- abs_dif_block_mu + (1.96 * sapply(abs_dif_block,sd)/sqrt(n_mc))
+# 
+# rbind(abs_dif_block_ci_lo,abs_dif_block_mu,abs_dif_block_ci_hi)
+# 
+# # sqrt( (trans_ABM[[1]])*(1 - trans_ABM[[1]])/N )
+# # 
+# # # 9 largest transition probabilities
+# # largest <- order(trans_KFE,decreasing = TRUE)[1:9]
+# # pos <- arrayInd(ind = largest,.dim = dim(trans_KFE),useNames = TRUE)
+# # 
+# # 
+# # largest_ABM <- lapply(X = seq_along(abm_dt),FUN = function(x){
+# #    probs <- trans_ABM[[x]][pos]
+# #    probs_sd <- sqrt( (probs)*(1 - probs)/nrep )
+# #    probs_lo <- probs - (probs_sd * 1.96)
+# #    probs_hi <- probs + (probs_sd * 1.96)
+# #    cbind(probs,probs_sd,probs_lo,probs_hi,dt=abm_dt[x])
+# # })
+# # # largest_ABM <- do.call(rbind,largest_ABM)
+# # 
+# # 
+# # library(plotrix)
+# # i = 7
+# # plotrix::plotCI(x = 1:9,y = largest_ABM[[i]][,"probs"],ui = largest_ABM[[i]][,"probs_hi"],li = largest_ABM[[i]][,"probs_lo"],ylim=c(0,0.02))
+# # points(x = 1:9,y = sort(trans_KFE,decreasing = T)[1:9],pch=16,col="steelblue")
